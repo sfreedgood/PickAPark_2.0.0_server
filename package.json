@@ -1,0 +1,26 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "proxy": "http://localhost:4567",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db:init": "dropdb --if-exists Pick_A_Park && createdb Pick_A_Park",
+    "db:reset": "node ./models/scripts/dbreset.js",
+    "db:seed": "node ./models/scripts/seed.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^3.0.4",
+    "body-parser": "^1.18.3",
+    "dotenv": "^6.2.0",
+    "express": "^4.16.4",
+    "jsonwebtoken": "^8.5.0",
+    "pg": "^7.8.1",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^4.42.1"
+  }
+}
