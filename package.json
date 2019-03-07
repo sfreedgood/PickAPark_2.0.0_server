@@ -6,6 +6,7 @@
   "proxy": "http://localhost:4567",
   "scripts": {
     "start": "node server.js",
+    "heroku-postbuild": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1",
     "db:init": "dropdb --if-exists Pick_A_Park && createdb Pick_A_Park",
     "db:reset": "node ./models/scripts/dbreset.js",
