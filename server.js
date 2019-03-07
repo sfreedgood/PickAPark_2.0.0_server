@@ -4,6 +4,8 @@ const app = express()
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('./auth/AuthMiddleware')
+const path = require('path')
+
 require('dotenv').config()
 
 const { User, Park, Camp } = require("./models/models/model")
@@ -13,6 +15,7 @@ const Op = Sequelize.Op
 
 app.use(bodyParser.json())
 app.use('/users', authMiddleware.checkToken)
+app.use("/", express.static("./build/"))
 
 //get all users
 app.get('/admin/users', async (req, res) => {

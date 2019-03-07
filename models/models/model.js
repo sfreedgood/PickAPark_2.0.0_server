@@ -1,13 +1,13 @@
 const Sequelize = require("sequelize")
 
-// const db = new Sequelize(process.env.DATABASE_URL || 'not-found', {
-//       dialect: 'postgres'
-// });
+const db = new Sequelize(process.env.DATABASE_URL || 'postgres://localhost:4567/Pick_A_Park', {
+    dialect: 'postgres'
+  });
 
-const db = new Sequelize({
-    database: "Pick_A_Park",
-    dialect: "postgres"
- })
+// const db = new Sequelize({
+//     database: "Pick_A_Park",
+//     dialect: "postgres"
+//  })
 
 const User = db.define('users', {
     user_name: {
