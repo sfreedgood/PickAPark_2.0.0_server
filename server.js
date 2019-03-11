@@ -310,7 +310,7 @@ const createUser = async (user) => { // this adds the user to the database, need
     return newUserId
 }
 
-app.post('/auth/signup', (req, res) => {
+app.post('/signup', (req, res) => {
     if(validateUser(req.body)) {
         getUserByEmail(req.body.user_name)
         .then(user => {
@@ -345,7 +345,7 @@ app.post('/auth/signup', (req, res) => {
     }
 })
 
-app.post('/auth/login', (req, res) => { //going to the /auth route
+app.post('/login', (req, res) => { //going to the /auth route
     if(validateUser(req.body)) {
         //check to see if in database
         getUserByEmail(req.body.email).then(user => {
