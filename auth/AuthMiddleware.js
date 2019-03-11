@@ -1,6 +1,5 @@
 // authorization functions
-// Used the following resource to get started with JWT
-// https://medium.com/dev-bits/a-guide-for-adding-jwt-token-based-authentication-to-your-single-page-nodejs-applications-c403f7cf04f4
+
 const jwt = require('jsonwebtoken');
 const secret = process.env.REACT_NATIVE_APP_SECRET
 
@@ -34,20 +33,3 @@ let checkToken = (req, res, next) => {
 module.exports = {
   checkToken: checkToken
 }
-
-
-
-// const isLoggedIn = (req, res, next) => {
-//     console.log(req)
-//     if(req){
-//         next()
-//     } else {
-//         res.status(401).json({
-//             message: 'Unauthorized, Please Login'
-//         })
-//     }
-// }
-
-// module.exports = {
-//     isLoggedIn
-// }
