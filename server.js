@@ -258,7 +258,7 @@ app.delete('/users/:userId/camps/:campId', async (req, res) => {
             }],
         })
         const campToDelete = camps.find(el => {
-            if (el./users.length > 0 ) {
+            if (el.users.length > 0 ) {
                 return el
             }
         }) 
