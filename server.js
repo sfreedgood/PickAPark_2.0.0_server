@@ -312,7 +312,7 @@ const createUser = async (user) => { // this adds the user to the database, need
 
 app.post('/signup', (req, res) => {
     if(validateUser(req.body)) {
-        getUserByEmail(req.body.user_name)
+        getUserByEmail(req.body.email)
         .then(user => {
             if(!user) {
                 bcrypt.hash(req.body.password, 8) // saltRounds is number of times, more is stronger
