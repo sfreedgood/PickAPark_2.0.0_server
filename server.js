@@ -264,9 +264,9 @@ app.delete('/users/:userId/camps/:campId', async (req, res) => {
         }) 
         if (campToDelete) {
             campToDelete.destroy()
-            res.json({ message: `camp ${campToDelete} was deleted.` })
+            res.json({ message: `camp ${campToDelete.name} was deleted.` })
         } else {
-            res.json({ message: `camp ${campToDelete} was not deleted.` })
+            res.json({ message: `camp ${campToDelete.name} was not deleted.` })
         }
     } catch (e) {
         res.status(500).json({
