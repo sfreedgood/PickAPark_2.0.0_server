@@ -277,6 +277,8 @@ app.delete('/users/:userId/camps/:campId', async (req, res) => {
 
 // authentication routes
 const bcrypt = require('bcrypt')
+const validator = require('validator')
+
 const secret = process.env.REACT_NATIVE_APP_SECRET
 
 app.get('/auth', (req, res) => {
@@ -285,34 +287,115 @@ app.get('/auth', (req, res) => {
     })
 })
 
-const validateUser = async (user) => {
-    const validEmail = user.email //should be string, and not blank
-    const validPassword = user.password //same as above + any other parameters
+const validateUser = (user) => {
+  let email = null;
+  let password = null;
+  let user_name = null;
 
-    // return validEmail and password;
-    return validEmail && validPassword;
+    const validEmail = validateEmail(user.email)
+    const validPassword = validatePassword(user.password)
+    const validUserName = validateUserName(user.user_name)
+
+    if (validEmail === true) {
+      email = user.email
+    } else {
+      email = validEmail
+    }
+
+    if (validPassword === true) {
+      password = user.password
+    } else {
+      password = validPassword
+    }
+
+    if (validUserName === true) {
+      user_name = user.user_name
+    } else {
+      user_name = validUserName
+    }
+
+    console.log(user_name)
+    console.log(password)
+    console.log(email)
+
+    // return email, username & password if all valid, otherwise returns relevant errors;
+    if (email === "pass" && user_name === "pass" && password === "pass") {
+      return true
+    } else {
+      let errors = [email, user_name, password].filter(el => {
+        if (el !== "pass") {
+          return el
+        }
+      })
+      return errors
+    }
+}
+
+const validateEmail = (email) => {
+  let errors = []
+  validator.isEmail(email) ? true : errors.push("Please enter an Email");
+  validator.isEmpty(email) && errors.push("Field cannot be Empty")
+  if (errors.length > 0) {
+    return errors
+  } else {
+    return "pass"
+  }
+}
+
+const validateUserName = (user_name) => {
+  let errors = []
+  validator.isAlphanumeric(user_name) ? true : errors.push("Username cannot contain special character");
+  validator.isEmpty(user_name) && errors.push("Field cannot be Empty")
+  if (errors.length > 0) {
+    return errors
+  } else {
+    return "pass"
+  }
+}
+
+const validatePassword = (password) => {
+  let errors = []
+  validator.isLength(password, {min: 6}) ? true : errors.push("Password must be at least 6 characters");
+  if (errors.length > 0) {
+    return errors
+  } else {
+    return "pass"
+  }
 }
 
 // 'user' below is a reference to the table name, need to adapt for sequelize
-const getUserByEmail = async (email) => {
+const getUser = async (email, user_name) => {
+  console.log(email)
+  console.log(user_name)
     let user = await User.findOne({
         where: {
-            email
+            [Op.or]: [{email}, {user_name}]
         }
     })
+    user === null && console.log("user does not exist")
+    user && console.log("user found")
     return user
 }
 
 const createUser = async (user) => { // this adds the user to the database, need to adapt to sequelize
-    const newUser = await User.create(user)
-    const newUserId = await User.findByPk(newUser.id)
-    
-    return newUserId
+    console.log("creating user")  
+    try {
+      const newUser = await User.create(user)
+      console.log("user created")
+      const newUserId = await User.findByPk(newUser.id)
+      console.log("returning user we created")
+      return newUserId
+    } catch (e) {
+      console.log(e)
+    }
+
 }
 
 app.post('/signup', (req, res) => {
-    if(validateUser(req.body)) {
-        getUserByEmail(req.body.email)
+    let userInfo = validateUser(req.body)
+    if ( userInfo === true ) {
+      console.log("valid User")
+        getUser(req.body.email, req.body.user_name)
         .then(user => {
             if(!user) {
                 bcrypt.hash(req.body.password, 8) // saltRounds is number of times, more is stronger
@@ -339,8 +422,16 @@ app.post('/signup', (req, res) => {
             }
         })
     } else {
+        userInfo = userInfo.concat(...userInfo)
+        const errors = userInfo.filter(el => {
+          if (!Array.isArray(el)){
+            return el
+          }
+        })
+        console.log(`else:`)
+        console.log(errors)
         res.json({
-            message: "BROKEN"
+            message: errors 
         })
     }
 })
@@ -348,7 +439,7 @@ app.post('/signup', (req, res) => {
 app.post('/login', (req, res) => { //going to the /auth route
     if(validateUser(req.body)) {
         //check to see if in database
-        getUserByEmail(req.body.email).then(user => {
+        getUser(req.body.email).then(user => {
             if(user){
                 //compare pwds
                 bcrypt.compare(req.body.password, user.password).then(result => { //user.password is the hashed password from the db
