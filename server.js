@@ -288,35 +288,10 @@ app.get('/auth', (req, res) => {
 })
 
 const validateUser = (user) => {
-  let email = null;
-  let password = null;
-  let user_name = null;
 
-    const validEmail = validateEmail(user.email)
-    const validPassword = validatePassword(user.password)
-    const validUserName = validateUserName(user.user_name)
-
-    if (validEmail === true) {
-      email = user.email
-    } else {
-      email = validEmail
-    }
-
-    if (validPassword === true) {
-      password = user.password
-    } else {
-      password = validPassword
-    }
-
-    if (validUserName === true) {
-      user_name = user.user_name
-    } else {
-      user_name = validUserName
-    }
-
-    console.log(user_name)
-    console.log(password)
-    console.log(email)
+    const email = validateEmail(user.email)
+    const password = validatePassword(user.password)
+    const user_name = validateUserName(user.user_name)
 
     // return email, username & password if all valid, otherwise returns relevant errors;
     if (email === "pass" && user_name === "pass" && password === "pass") {
