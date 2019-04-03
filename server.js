@@ -359,12 +359,36 @@ const createUser = async (user) => {
 
 }
 
+// filters input errors for login functions
+const userInputErrors = (userName, userEmail, userPassword, res) => {
+  let errors = []
+  // adds all errors to errors array, regardless of if single values or arrays
+  Array.isArray(userName)
+    ? userName.forEach(el => el !== "pass" && errors.push(el))
+    : userName !== "pass" && errors.push(userName) 
+  Array.isArray(userEmail)
+    ? userEmail.forEach(el => el !== "pass" && errors.push(el))
+    : userEmail !== "pass" && errors.push(userEmail)
+  Array.isArray(userPassword)
+    ? userPassword.forEach(el => el !== "pass" && errors.push(el))
+    : userPassword !== "pass" && errors.push(userPassword)
+  
+  if (errors.length > 0) { // returns list of invalid input errors
+    res.json({
+        message: errors
+    })
+  } else { // returns message saying data does not match system info if no other errors occur
+    res.json({
+        message: "Not found.\nPlease check you entered your info correctly"
+    })
+  }
+}
+
 // handles all authentication for creating a new user 
 // creates new user if successful or returns relevant errors if not
 app.post('/signup', (req, res) => {
     let userInfo = validateUser(req.body)
     if ( userInfo === true ) {
-      console.log("valid User")
         getUser(req.body.email, req.body.user_name)
         .then(user => {
             if(!user) {
@@ -407,8 +431,11 @@ app.post('/signup', (req, res) => {
 })
 
 // handles all authentication of existing users
-app.post('/login', (req, res) => { 
-    if(validateUserEmail(req.body.email) && validateUserPassword(req.body.password)) { // check that all fields valid
+app.post('/login', async (req, res) => { 
+    let userName = await validateUserName(req.body.user_name)
+    let userEmail = await validateUserEmail(req.body.email)
+    let userPassword = await validateUserPassword(req.body.password)
+    if( userEmail === "pass" || userName === "pass" && userPassword === "pass") { // check that a user entered valid user data
         getUser(req.body.email, req.body.user_name).then(user => { //check to see if in database
             if(user){
                 bcrypt.compare(req.body.password, user.password).then(result => { //compare pwds
@@ -427,15 +454,11 @@ app.post('/login', (req, res) => {
                     }
                 })
             } else {
-                res.json({
-                    message: "Invalid User"
-                })
+                userInputErrors(userName, userEmail, userPassword, res)
             }
         })
     } else {
-        res.json({
-            message: "Please Sign-Up to continue"
-        })
+        userInputErrors(userName, userEmail, userPassword, res)
     }
 })
 
