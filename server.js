@@ -30,11 +30,11 @@ app.get('/admin/users', async (req, res) => {
     }
 })
 
-//get user by id
-app.get('/admin/users/:id', async (req, res) => {
+//get user by username
+app.get(`/admin/users/:username`, async (req, res) => {
     try {
-        const id = req.params.id
-        const user = await User.findByPk(id)
+        const user_name = req.params.username
+        const user = await User.findOne({where: {user_name}})
         res.json({ user })
 
     } catch (e) {
@@ -289,8 +289,8 @@ app.get('/auth', (req, res) => {
 
 const validateUser = (user) => {
 
-    const email = validateEmail(user.email)
-    const password = validatePassword(user.password)
+    const email = validateUserEmail(user.email)
+    const password = validateUserPassword(user.password)
     const user_name = validateUserName(user.user_name)
 
     // return email, username & password if all valid, otherwise returns relevant errors;
@@ -306,9 +306,9 @@ const validateUser = (user) => {
     }
 }
 
-const validateEmail = (email) => {
+const validateUserEmail = (email) => {
   let errors = []
-  validator.isEmail(email) ? true : errors.push("Please enter an Email");
+  validator.isEmail(email) ? true : errors.push("Please enter a valid Email");
   validator.isEmpty(email) && errors.push("Field cannot be Empty")
   if (errors.length > 0) {
     return errors
@@ -328,7 +328,7 @@ const validateUserName = (user_name) => {
   }
 }
 
-const validatePassword = (password) => {
+const validateUserPassword = (password) => {
   let errors = []
   validator.isLength(password, {min: 6}) ? true : errors.push("Password must be at least 6 characters");
   if (errors.length > 0) {
@@ -338,27 +338,20 @@ const validatePassword = (password) => {
   }
 }
 
-// 'user' below is a reference to the table name, need to adapt for sequelize
 const getUser = async (email, user_name) => {
-  console.log(email)
-  console.log(user_name)
     let user = await User.findOne({
         where: {
             [Op.or]: [{email}, {user_name}]
         }
     })
-    user === null && console.log("user does not exist")
-    user && console.log("user found")
     return user
 }
 
-const createUser = async (user) => { // this adds the user to the database, need to adapt to sequelize
-    console.log("creating user")  
+// adds new user to the database then returns that user
+const createUser = async (user) => {
     try {
       const newUser = await User.create(user)
-      console.log("user created")
       const newUserId = await User.findByPk(newUser.id)
-      console.log("returning user we created")
       return newUserId
     } catch (e) {
       console.log(e)
@@ -366,6 +359,8 @@ const createUser = async (user) => { // this adds the user to the database, need
 
 }
 
+// handles all authentication for creating a new user 
+// creates new user if successful or returns relevant errors if not
 app.post('/signup', (req, res) => {
     let userInfo = validateUser(req.body)
     if ( userInfo === true ) {
@@ -411,19 +406,14 @@ app.post('/signup', (req, res) => {
     }
 })
 
-app.post('/login', (req, res) => { //going to the /auth route
-    if(validateUser(req.body)) {
-        //check to see if in database
-        getUser(req.body.email).then(user => {
+// handles all authentication of existing users
+app.post('/login', (req, res) => { 
+    if(validateUserEmail(req.body.email) && validateUserPassword(req.body.password)) { // check that all fields valid
+        getUser(req.body.email, req.body.user_name).then(user => { //check to see if in database
             if(user){
-                //compare pwds
-                bcrypt.compare(req.body.password, user.password).then(result => { //user.password is the hashed password from the db
-                    // if passwords match
-                    if (result) {
-                        //set jwt
-                        const token = jwt.sign({user_id: user.id},
-                            secret
-                          );
+                bcrypt.compare(req.body.password, user.password).then(result => { //compare pwds
+                    if (result) { // if passwords match
+                        const token = jwt.sign({user_id: user.id}, secret); //set jwt
                         res.json({
                             success: true,
                             token: token,
