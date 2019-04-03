@@ -4,7 +4,6 @@ const app = express()
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('./auth/AuthMiddleware')
-const path = require('path')
 
 require('dotenv').config()
 
