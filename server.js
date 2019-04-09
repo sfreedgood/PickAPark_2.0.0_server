@@ -8,7 +8,7 @@ const authMiddleware = require('./auth/AuthMiddleware')
 require('dotenv').config()
 
 const { User, Park, Camp } = require("./models/models/model")
-const PORT = process.env.PORT || 80
+const PORT = process.env.PORT
 
 const Op = Sequelize.Op
 
