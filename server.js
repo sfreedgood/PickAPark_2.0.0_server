@@ -1,11 +1,10 @@
+require('dotenv').config();
 const express = require("express")
 const Sequelize = require("sequelize")
 const app = express()
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('./auth/AuthMiddleware')
-
-require('dotenv').config()
 
 const { User, Park, Camp } = require("./models/models/model")
 const PORT = process.env.PORT || 4567
@@ -15,6 +14,15 @@ const Op = Sequelize.Op
 app.use(bodyParser.json())
 app.use('/users', authMiddleware.checkToken)
 app.use("/", express.static("./build/"))
+
+//test connections
+app.get('/test/', async (req, res) => {
+    try {
+	res.json({message: 'Congrats, you found me'})
+    } catch (e) {
+        res.json({message: 'oops, didnt work'})
+    }
+})
 
 //get all users
 app.get('/admin/users', async (req, res) => {
